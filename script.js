@@ -16,7 +16,9 @@ fetch(BASE_URL)
   .then((json) => {
     movies = json.results;
     listEl.innerHTML = json.results.map((el) => {
-      return `<section class="gallery-child"><div class="film-card">
+      return `<section id="section${json.results.indexOf(
+        el
+      )}" class="gallery-child"><div class="film-card">
       <img
         class="poster"
         src="${IMAGE_URL}${el.poster_path}"
@@ -25,12 +27,14 @@ fetch(BASE_URL)
       <div class="film-card-bottom">
         <div class="film-info">
           <h3>${el.title}</h3>
-          <p>▹${el.overview}...<a href="${DETAILS_URL}${el.id}${el.title}">
-          click for more details</a></p>
-          <span>🎬<a href="${TRAILER_URL}">trailer</a></span>
+          <a id="${json.results.indexOf(
+            el
+          )}" href="#">▹click for more details</a>
         </div>
         <div  class="button-div">
-          <button id="${json.results.indexOf(el)}" class="add-to-saved">♥
+          <button id="${json.results.indexOf(
+            el
+          )}"class="add-to-saved">♥
           </button>
         </div>
       </div>
@@ -44,7 +48,6 @@ fetch(BASE_URL)
 
     cards.forEach((el) => {
       el.addEventListener("click", function (e) {
-        console.log(e);
         if (e.target.tagName === "BUTTON") {
           const userEmail = prompt("Please enter your email address");
           const userPassword = prompt("Please enter your password");
@@ -58,15 +61,50 @@ fetch(BASE_URL)
               );
               throw error;
             } else {
-              savedArray.push(movies[e.target.id]);
-              console.log(savedArray);
+              savedArray.push(movies[e.target.id])
               localStorage.setItem("savedFilm", savedArray);
-              document.getElementById(e.target.id).style.color = "red";
+              e.target.style.color = "red";
             }
           } catch (error) {
             localStorage.setItem("userPassword", userPassword);
             localStorage.setItem("userEmail", userEmail);
           }
+        }
+        if (e.target.tagName === "A") {
+          const modalEl = document.createElement("div");
+          modalEl.classList.add("modal");
+          modalEl.innerHTML =
+            e.target.parentNode.parentNode.parentNode.innerHTML +
+            `<div class="modal-content">
+            <h3 class="modal-title">Title: ${JSON.stringify(
+              movies[e.target.id].title
+            )}</h3>
+            <p class="modal-overview">Overview: ${JSON.stringify(
+              movies[e.target.id].overview
+            )}</p>
+            <p class="modal-language">Original language: ${JSON.stringify(
+              movies[e.target.id].original_language
+            )}</p>
+            <p class="modal-vote">Vote: ${JSON.stringify(
+              movies[e.target.id].vote_average
+            )}</p>
+            <p class="modal-date">Release date: ${JSON.stringify(
+              movies[e.target.id].release_date
+            )}</p>
+            <p class="modal-trailer">Trailer ⇩</p>
+            <iframe width="280" height="158" src="https://www.youtube.com/embed/KAOdjqyG37A" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <button id="close-button" class="close-button">close</button>
+           `;
+          document.body.append(modalEl);
+          const modals = document.querySelectorAll(".modal");
+          modals.forEach((el) =>
+            el.addEventListener("click", function (e) {
+              if (e.target.tagName === "BUTTON") {
+                modalEl.style.transform = "scale(0)";
+              }
+            })
+          );
         }
       });
     });
@@ -76,4 +114,5 @@ fetch(BASE_URL)
     listEl.innerHTML = `<li>ERRORE API</li>`;
     return [];
   });
+
 //---------------------------------------------------------fine fetch
